@@ -1,9 +1,12 @@
 # PDF Thumbnail Generator Plugin for Craft CMS
 
+**Currently requires php5-imagick**
+
 More detailed read me on the way.
 
 ## Installation
 
+0. Ensure php5-imagick is installed.
 1. Upload this directory to `craft/plugins/pdfthumbnails/` on your server.
 2. Enable the plugin under Craft Admin > Settings > Plugins
 
