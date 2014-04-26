@@ -115,24 +115,48 @@ class PdfThumbnailsPlugin extends BasePlugin
                 // Make the thumbs directory if it doesn't already exist
                 IOHelper::ensureFolderExists($sourcePath.$thumbsDirName);
 
-                //Create the thumbnail with Imagick
-                try
-                {
-                    $tempImg = new \Imagick();
-                    $tempImg->setResolution( 72, 72 );
-                    $tempImg->readImage( $sourceFullPath.'['.$whichPdfPage.']' );
-                    $tempImg->cropThumbnailImage( $width, $height );
-                    $tempImg = $tempImg->flattenImages();
-                    //$tempImg->adaptiveSharpenImage(2,1);
-                    $tempImg->writeImage($destFullPath);
-                }
-                catch(ImagickException $e)
-                {
-                    Craft::log('Imagick Error: '.$e->getMessage(), 'error', true, 'plugin');
-                    return;
-                }
-
-                return $destFullPath;
+				// PHP-Imagick installed? Use that.
+				if (extension_loaded('imagick')) {
+	
+	                //Create the thumbnail with Imagick
+	                try
+	                {
+	                    $tempImg = new \Imagick();
+	                    $tempImg->setResolution( 72, 72 );
+	                    $tempImg->readImage( $sourceFullPath.'['.$whichPdfPage.']' );
+	                    $tempImg->cropThumbnailImage( $width, $height );
+	                    $tempImg = $tempImg->flattenImages();
+	                    //$tempImg->adaptiveSharpenImage(2,1);
+	                    $tempImg->writeImage($destFullPath);
+	                }
+	                catch(ImagickException $e)
+	                {
+	                    Craft::log('PHP-Imagick Error: '.$e->getMessage(), 'error', true, 'plugin');
+	                    return;
+	                }
+	
+	                return $destFullPath;
+	                
+	            // Plain old Imagick installed? Use that instead.
+	            } else if (!exec("convert -version 2>&1")) {
+					
+					//$modifier = '^ -gravity center -extent ' . $this->params["dimensions"];
+					$modifier = '!';
+					$exec_str = "convert -colorspace RGB -resize " . $dimensions . $modifier . ' ' . $sourceFullPath . "[" . $whichPdfPage . "] " . $destFullPath . " 2>&1";
+					
+					$error = exec($exec_str);
+					
+					if($error) {
+						Craft::log('Imagick Error', 'error', true, 'plugin');
+						return false;
+					}
+					
+	                return $destFullPath;
+		            
+	            } else {
+		            // Neither PHP-Imagick or Imagick is installed... Sorry
+		            Craft::log("Neither PHP-Imagick or Imagick is installed... Sorry!", 'error', true, 'plugin');
+	            }
             }
         }
     }

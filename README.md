@@ -1,6 +1,6 @@
 # PDF Thumbnail Generator Plugin for Craft CMS
 
-**Currently requires php5-imagick**
+**Currently requires php5-imagick or Imagemagick**
 
 More detailed read me on the way.
 
